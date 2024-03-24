@@ -6,7 +6,7 @@ from copy import copy
 import numpy as np
 from gymnasium.spaces import Discrete, MultiDiscrete
 
-class CustomEnvironment(ParallelEnv):
+class CollusionEnvironment(ParallelEnv):
     metadata = {
         "name": "collusion_environment_v0",
     }
@@ -17,7 +17,7 @@ class CustomEnvironment(ParallelEnv):
         """
         self.escape: tuple[int, int] = None, None
         self.guard: tuple[int, int] = None, None
-        self.prisoner = tuple[int, int]= None, None
+        self.prisoner: tuple[int, int] = None, None
         self.timestep: int = None
         self.possible_agents: list[str, str] = ["prisoner", "guard"]
 
@@ -36,10 +36,10 @@ class CustomEnvironment(ParallelEnv):
         self.agents = copy(self.possible_agents)
         self.timestep = 0
 
-        self.prisoner = 0, 0
-        self.guard = 6, 6
+        self.prisoner = [0, 0]
+        self.guard = [6, 6]
 
-        self.escape = randint(2,5), randint(2, 5)
+        self.escape = [randint(2,5), randint(2,5)]
 
         observations = self.get_observations()
 
@@ -104,8 +104,6 @@ class CustomEnvironment(ParallelEnv):
         
         return observations, rewards, terminations, truncations, infos
 
-
-
     def render(self):
         grid = np.full((7, 7), " ")
         grid[self.prisoner] = "P"
@@ -122,3 +120,9 @@ class CustomEnvironment(ParallelEnv):
     @functools.lru_cache(maxsize=None)
     def action_space(self, agent):
         return Discrete(4)
+
+from pettingzoo.test import parallel_api_test
+
+if __name__ == "__main__":
+    env = CollusionEnvironment()
+    parallel_api_test(env, num_cycles=1_000_000)
