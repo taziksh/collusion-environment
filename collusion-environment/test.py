@@ -1,14 +1,18 @@
 import numpy as np
 import environs
 import random
+import math
 
 env = environs.Cournot()
 
-qtable = np.zeros((1, 3))
+number_actions = 3
+
+qtable = np.ones((1, number_actions))
 
 learning_rate = 0.9
 discount_rate = 0.8
-epsilon = 0.5
+#epsilon = 0.5 # for randomly chose
+beta = 0.5 # for chosing like in the paper
 decay_rate= 0.005
 
 num_episodes = 100
@@ -23,12 +27,31 @@ for episode in range(num_episodes):
     for s in range(max_steps):
 
         # exploration-exploitation tradeoff
-        if random.uniform(0,1) < epsilon:
+        
+        logit = lambda a: math.exp(qtable[0,a]/beta) / sum([math.exp(qtable[0,a]/beta) for a in [0,1,2]])
+        
+        probs = [logit(action) for action in range(0,number_actions)]
+        
+        collect = 0
+        p = []
+        for prob in probs:
+            collect = prob + collect
+            p.append(collect)
+
+        r = random.uniform(0,1)
+        if r<p[0]:
+            action = 0
+        elif r<p[1]:
+            action = 1
+        else:
+            action = 2
+
+        '''if random.uniform(0,1) < epsilon:
             # explore
             action = env.action_space.sample()
         else:
             # exploit
-            action = np.argmax(qtable[state,:])
+            action = np.argmax(qtable[state,:])'''
 
         # take action and observe reward
         new_state, reward, done, info = env.step(action)
