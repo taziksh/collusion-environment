@@ -12,12 +12,12 @@ num_actions = 3
 
 learning_rate = 0.9
 discount_rate = 0.8
-beta = 0.5 # for chosing like in the paper
+beta = 1000 # for chosing like in the paper
 decay_rate= 0.005
 epsilon = 0.1
 
-num_episodes = 100
-max_steps = 30
+num_episodes = 10000
+max_steps = 300
 
 env = environs.Cournot(num_agents)
 
@@ -39,13 +39,16 @@ for episode in range(num_episodes):
             # Q-learning algorithm
             for agent_idx, reward in enumerate(rewards):
                 agents[agent_idx].update_qtable(actions[agent_idx], reward)
-    
+
+            beta = beta*0.999
+
             if done:
                 break
     
     # for agent in agents:
     #     agent.decrease_epsilon(episode)
 
+print('Beta is:' +str(beta))
 
 print(f"Training completed over {num_episodes} episodes")
 for i, agent in enumerate(agents):
