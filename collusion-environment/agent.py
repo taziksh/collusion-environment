@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import math
 
 class Agent:
     def __init__(self, num_actions, learning_rate, beta, epsilon):
@@ -11,8 +12,8 @@ class Agent:
         self.qtable = np.ones((1, num_actions))
 
     def softmax(self):
-        q_exp = np.exp(self.qtable[0] / self.beta)
-        probs = q_exp / np.sum(q_exp)
+        logit = lambda a: math.exp(self.qtable[0,a]/self.beta) / sum([math.exp(self.qtable[0,a]/self.beta) for a in range(self.num_actions)])
+        probs = [logit(action) for action in range(0,self.num_actions)]
         return probs
 
     def select_action(self):
@@ -29,7 +30,8 @@ class Agent:
         for i in range(0, self.num_actions):
             if r < p[i]:
                 action = i
-        
+                break
+               
         # probs = self.softmax()
         # action = np.random.choice(range(self.num_actions), p=probs)
         

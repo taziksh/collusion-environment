@@ -8,7 +8,7 @@ np.set_printoptions(precision=2)
 
 num_agents = 2
 
-num_actions = 5
+num_actions = 3
 
 learning_rate = 0.9
 discount_rate = 0.8
