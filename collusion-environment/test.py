@@ -6,7 +6,7 @@ import math
 
 np.set_printoptions(precision=2)
 
-num_agents = 2
+num_agents = 3
 
 num_actions = 3
 
@@ -34,7 +34,7 @@ for episode in range(num_episodes):
             actions = [agent.select_action() for agent in agents]
             
             # take action and observe reward
-            new_states, rewards, done, _ = env.step(actions)
+            new_states, rewards, done, _ = env.step(actions, agents)
 
             # Q-learning algorithm
             for agent_idx, reward in enumerate(rewards):

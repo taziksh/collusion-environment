@@ -18,25 +18,33 @@ class Cournot(gym.Env):
 
         return [0] * self.num_agents, {} #observation and info
 
+    def get_price(self):
+        total_production = sum(self._qs)
+        return 50 - total_production
+
     def _profit_function(self, q, total_q):
         price = max(0, 1 - total_q * 0.1) # linear
         profit = price * q - (q**2) * 0.05 # quadratic
         return profit
 
-    def step(self, actions):
+    def step(self, actions, agents):
         self._qs = actions
-        total_production = sum(self._qs)
 
-        rewards = []
-        for q in self._qs:
-            reward = self._profit_function(q, total_production)
-            rewards.append(reward)
+        # for q in self._qs:
+        #     reward = self._profit_function(q, total_production)
+        #     rewards.append(reward)
 
         observations = [0] * self.num_agents
 
         # An episode is done iff the agent has reached the target
         terminated = [False] * self.num_agents
         observations = [0] * self.num_agents
+
+        rewards = []
+        for agent in agents:
+            reward = agent.get_profit(self.get_price())
+            rewards.append(reward)
+
         info = {}
 
         if self.render_mode == "human":
