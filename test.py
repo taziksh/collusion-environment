@@ -3,6 +3,7 @@ import environs
 import agent
 import random
 import math
+import argparse
 
 np.set_printoptions(precision=2)
 
@@ -29,11 +30,11 @@ epsilon = 0.1 # in paper: not used, but for less computational effort keep that 
 num_episodes = 1000
 max_steps = 300
 
-env = environs.Cournot(num_agents)
+env = environs.Cournot(args.num_agents)
 
-agents = [agent.Agent(num_actions, learning_rate, beta, epsilon) for _ in range(num_agents)]
+agents = [agent.Agent(args.num_actions, learning_rate, beta, epsilon) for _ in range(args.num_agents)]
 
-for episode in range(num_episodes):
+for episode in range(args.num_episodes):
 
     # reset the environment
     state, info = env.reset()
@@ -60,6 +61,6 @@ for episode in range(num_episodes):
 
 print('Beta is:' +str(beta))
 
-print(f"Training completed over {num_episodes} episodes")
+print(f"Training completed over {args.num_episodes} episodes")
 for i, agent in enumerate(agents):
     print(f"Q-values for agent {i}: {agent.qtable}")
