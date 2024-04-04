@@ -3,7 +3,6 @@ import numpy as np
 
 class Cournot(gym.Env):
     def __init__(self):
-
         self.action_space = gym.spaces.Discrete(3)
         #print(self.action_space)
 
@@ -35,4 +34,4 @@ class Cournot(gym.Env):
 
         return observation, reward, terminated, info
 
-print(Cournot().step(3))
+print(f"Cournot steps: {Cournot().step(3)}")

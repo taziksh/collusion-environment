@@ -5,9 +5,9 @@ import math
 
 env = environs.Cournot()
 
-number_actions = 3
+num_actions = 3
 
-qtable = np.ones((1, number_actions))
+qtable = np.ones((1, num_actions))
 
 learning_rate = 0.9
 discount_rate = 0.8
@@ -18,6 +18,8 @@ decay_rate= 0.005
 num_episodes = 100
 max_steps = 30
 
+total_softmax = sum([math.exp(qtable[0,a]/beta) for a in range(num_actions)])
+
 for episode in range(num_episodes):
 
     # reset the environment
@@ -25,26 +27,29 @@ for episode in range(num_episodes):
     done = False
 
     for s in range(max_steps):
-
         # exploration-exploitation tradeoff
         
-        logit = lambda a: math.exp(qtable[0,a]/beta) / sum([math.exp(qtable[0,a]/beta) for a in [0,1,2]])
+        softmax = lambda a: math.exp(qtable[0,a]/beta) / total_softmax
         
-        probs = [logit(action) for action in range(0,number_actions)]
+        probs = [softmax(action) for action in range(0,num_actions)]
         
         collect = 0
-        p = []
+        cum_prob = []
         for prob in probs:
             collect = prob + collect
-            p.append(collect)
+            cum_prob.append(collect)
 
         r = random.uniform(0,1)
-        if r<p[0]:
-            action = 0
-        elif r<p[1]:
-            action = 1
-        else:
-            action = 2
+        for i in range(0, num_actions):
+            if r < cum_prob[i]:
+                action = i
+
+        # if r<cum_prob[0]:
+        #     action = 0
+        # elif r<cum_prob[1]:
+        #     action = 1
+        # else:
+        #     action = 2
 
         '''if random.uniform(0,1) < epsilon:
             # explore
@@ -69,8 +74,7 @@ for episode in range(num_episodes):
             break
 
     # Decrease epsilon
-    epsilon = np.exp(-decay_rate*episode)
+    # epsilon = np.exp(-decay_rate*episode)
 
 print(f"Training completed over {num_episodes} episodes")
-
-print(qtable)
+print(f"Qtable: {qtable}")
