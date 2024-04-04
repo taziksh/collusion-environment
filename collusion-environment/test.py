@@ -1,13 +1,27 @@
 import numpy as np
 import environs
+import agent
+import random
+import math
 
+np.set_printoptions(precision=2)
 
-env = environs.Cournot()
+num_agents = 2
+
+num_actions = 5
+
+learning_rate = 0.9
+discount_rate = 0.8
+beta = 0.5 # for chosing like in the paper
+decay_rate= 0.005
+epsilon = 0.1
 
 num_episodes = 100
 max_steps = 30
 
-agents = [environs.Agent() for i in range(3)]
+env = environs.Cournot(num_agents)
+
+agents = [agent.Agent(num_actions, learning_rate, beta, epsilon) for _ in range(num_agents)]
 
 for episode in range(num_episodes):
 
@@ -15,38 +29,24 @@ for episode in range(num_episodes):
     state, info = env.reset()
     done = False
 
-    for s in range(max_steps):
+    while not done:
+        for s in range(max_steps):
+            actions = [agent.select_action() for agent in agents]
+            
+            # take action and observe reward
+            new_states, rewards, done, _ = env.step(actions)
 
-        # exploration-exploitation tradeoff
-        actions = []
+            # Q-learning algorithm
+            for agent_idx, reward in enumerate(rewards):
+                agents[agent_idx].update_qtable(actions[agent_idx], reward)
+    
+            if done:
+                break
+    
+    for agent in agents:
+        agent.decrease_epsilon(episode)
 
-        for agent in agents:
-            actions.append(agent.run())
-
-        '''if random.uniform(0,1) < epsilon:
-            # explore
-            action = env.action_space.sample()
-        else:
-            # exploit
-            action = np.argmax(qtable[state,:])'''
-
-        # take action and observe reward
-        new_state, rewards, done, info = env.step(actions,agents)
-
-        for i, agent in zip(range(len(agents)),agents):
-            agent.update(rewards[i],state,actions[i])
-        
-        # Update to our new state
-        state = new_state
-
-        # if done, finish episode
-        if done:
-            break
-
-    # Decrease epsilon
-    # epsilon = np.exp(-decay_rate*episode)
 
 print(f"Training completed over {num_episodes} episodes")
-
-for agent in agents:
-    print(agent.qtable)
+for i, agent in enumerate(agents):
+    print(f"Q-values for agent {i}: {agent.qtable}")
