@@ -14,7 +14,7 @@ learning_rate = 0.9
 discount_rate = 0.8
 beta = 0.5 # for chosing like in the paper
 decay_rate= 0.005
-epsilon = 0.1
+# epsilon = 0.1
 
 num_episodes = 100
 max_steps = 30
@@ -43,8 +43,8 @@ for episode in range(num_episodes):
             if done:
                 break
     
-    for agent in agents:
-        agent.decrease_epsilon(episode)
+    # for agent in agents:
+    #     agent.decrease_epsilon(episode)
 
 
 print(f"Training completed over {num_episodes} episodes")

@@ -10,7 +10,7 @@ class Agent:
         self.beta = beta
         self.epsilon = epsilon
         #TODO: try np.zeros
-        self.qtable = np.ones((1, num_actions))
+        self.qtable = np.zeros((1, num_actions))
 
     def softmax(self):
         logit = lambda a: math.exp(self.qtable[0,a]/self.beta) / sum([math.exp(self.qtable[0,a]/self.beta) for a in range(self.num_actions)])

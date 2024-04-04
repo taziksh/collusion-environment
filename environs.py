@@ -20,13 +20,8 @@ class Cournot(gym.Env):
 
     def get_price(self):
         total_production = sum(self._qs)
-        return 50 - total_production
-
-    def _profit_function(self, q, total_q):
-        price = max(0, 1 - total_q * 0.1) # linear
-        profit = price * q - (q**2) * 0.05 # quadratic
-        return profit
-
+        return max(0, 10 - total_production)
+    
     def step(self, actions, agents):
         self._qs = actions
 
