@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 class Agent:
     def __init__(self, num_actions, learning_rate, beta, epsilon):
@@ -15,15 +16,29 @@ class Agent:
         return probs
 
     def select_action(self):
+        probs = self.softmax()
+
+        collect = 0
+        p = []
+        for prob in probs:
+            collect = prob + collect
+            p.append(collect)
+
+        r = random.uniform(0, 1)
+
+        for i in range(0, self.num_actions):
+            if r < p[i]:
+                action = i
+        
         # probs = self.softmax()
         # action = np.random.choice(range(self.num_actions), p=probs)
         
-        # Explore
-        if np.random.rand() < self.epsilon:
-            action = np.random.randint(self.num_actions)
-        # Exploit
-        else:
-            action = np.argmax(self.qtable[0])
+        # # Explore
+        # if np.random.rand() < self.epsilon:
+        #     action = np.random.randint(self.num_actions)
+        # # Exploit
+        # else:
+        #     action = np.argmax(self.qtable[0])
         return action
 
     def decrease_epsilon(self, episode, decay_rate=0.99, min_epsilon=0.01):
