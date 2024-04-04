@@ -2,10 +2,13 @@ import gym
 import numpy as np
 
 class Cournot(gym.Env):
-    def __init__(self, num_agents):
+    def __init__(self, num_agents,demand_quantity, demand_factor):
         self.num_agents = num_agents
         self.action_space = gym.spaces.Discrete(3)
         #print(self.action_space)
+
+        self.u = demand_quantity
+        self.v = demand_factor
 
         # self._q = 0
         self._qs = [0] * self.num_agents
@@ -20,7 +23,7 @@ class Cournot(gym.Env):
 
     def get_price(self):
         total_production = sum(self._qs)
-        return max(0, 10 - total_production)
+        return max(0, self.u - self.v*total_production)
     
     def step(self, actions, agents):
         self._qs = actions

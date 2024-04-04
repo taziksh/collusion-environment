@@ -3,14 +3,27 @@ import random
 import math
 
 class Agent:
-    def __init__(self, num_actions, learning_rate, beta, epsilon):
+    def __init__(self, num_actions,num_cumul_actions, learning_rate, beta, epsilon, variable_cost, fixed_cost,memory=False):
         self.num_actions = num_actions
         self.q = 0
         self.learning_rate = learning_rate
         self.beta = beta
         self.epsilon = epsilon
+        self.w = variable_cost
+        self.f = fixed_cost
+        self.memory = memory
         #TODO: try np.zeros
-        self.qtable = np.zeros((1, num_actions))
+        if memory:
+            self.qtable = np.zeros((num_actions, num_cumul_actions, num_actions))
+        else:
+            self.qtable = np.zeros((1, 1, num_actions))
+
+    def reset(self):
+        if self.memory:
+            self.qtable = np.zeros((self.num_states, self.num_cumul_actions, self.num_actions))
+        else:
+            self.qtable = np.zeros((1, 1, self.num_actions))
+        self.q = 0
 
     def softmax(self):
         logit = lambda a: math.exp(self.qtable[0,a]/self.beta) / sum([math.exp(self.qtable[0,a]/self.beta) for a in range(self.num_actions)])
@@ -18,7 +31,7 @@ class Agent:
         return probs
 
     def get_profit(self,price):
-        return price*self.q - 2*self.q
+        return price*self.q - self.w*self.q - self.f
 
     def select_action(self):
         probs = self.softmax()

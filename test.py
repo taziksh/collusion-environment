@@ -1,9 +1,6 @@
 import numpy as np
 import environs
 import agent
-import random
-import math
-import argparse
 
 np.set_printoptions(precision=2)
 
@@ -11,11 +8,17 @@ num_agents = 2 # in paper: [2 , 3, 4 , 5 , 6]
 
 num_actions = 40 # in paper: 40
 
+num_cumulative_action = 1 # with memory: num_agents*num_actions
+
 demand_quantity = 40 # in paper it is denoted with u=40
 demand_factor = 1 # in paper it is denoted with v=1
 
+variable_cost = 4 # the variable cost w = 4
+fixed_cost = 0 # in the paper we have f = 0
+
 learning_rate = 0.5 # in paper: [ 0.05 , 0.25 , 0.5 , 1 ]
-beta = 1000 # for chosing like in the paper, decay by factor 0.999 each time step
+beta = 1000 # for chosing like in the paper
+# In paper decay by factor 0.99999 each time step, but computationally 0.999 better
 
 # with memory means we have states different states for each agent:
 # - own previous production level
@@ -27,17 +30,22 @@ gamma = 0 # myopic firms=0 , non-myopic 0.9
 
 epsilon = 0.1 # in paper: not used, but for less computational effort keep that approach
 
+# unresolved: Read!
+# TODO: Do they in the paper have several episodes so reset environment several times?
 num_episodes = 1000
 max_steps = 300
 
-env = environs.Cournot(args.num_agents)
+env = environs.Cournot(num_agents,demand_quantity,demand_factor)
 
-agents = [agent.Agent(args.num_actions, learning_rate, beta, epsilon) for _ in range(args.num_agents)]
+agents = [agent.Agent(num_actions, num_cumulative_action,
+                      learning_rate, beta, epsilon, variable_cost, fixed_cost)
+                      for _ in range(num_agents)]
 
-for episode in range(args.num_episodes):
+for episode in range(num_episodes):
 
     # reset the environment
     state, info = env.reset()
+    [agent.reset() for agent in agents]
     done = False
 
     while not done:
@@ -61,6 +69,6 @@ for episode in range(args.num_episodes):
 
 print('Beta is:' +str(beta))
 
-print(f"Training completed over {args.num_episodes} episodes")
+print(f"Training completed over {num_episodes} episodes")
 for i, agent in enumerate(agents):
     print(f"Q-values for agent {i}: {agent.qtable}")
