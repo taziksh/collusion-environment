@@ -14,7 +14,7 @@ learning_rate = 0.9
 discount_rate = 0.8
 beta = 0.5 # for chosing like in the paper
 decay_rate= 0.005
-# epsilon = 0.1
+epsilon = 0.1
 
 num_episodes = 100
 max_steps = 30
