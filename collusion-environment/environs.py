@@ -44,4 +44,5 @@ class Cournot(gym.Env):
 
         return observations, rewards, terminated, info
 
+# Example Usage
 # print(f"Cournot steps: {Cournot().step(3)}")
