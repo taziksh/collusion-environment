@@ -3,12 +3,21 @@ import environs
 import agent
 import random
 import math
+import argparse
 
 np.set_printoptions(precision=2)
 
-num_agents = 3
+parser = argparse.ArgumentParser()
 
-num_actions = 3
+parser.add_argument('--num_agents', type=int, default=3, help='number of agents')
+parser.add_argument('--num_actions', type=int, default=3, help='number of actions')
+parser.add_argument('--num_episodes', type=int, default=10000, help='number of episodes')
+
+# num_agents = 3
+# num_actions = 3
+# num_episodes = 10000
+
+args = parser.parse_args()
 
 learning_rate = 0.9
 discount_rate = 0.8
@@ -16,14 +25,13 @@ beta = 1000 # for chosing like in the paper
 decay_rate= 0.005
 epsilon = 0.1
 
-num_episodes = 10000
 max_steps = 300
 
-env = environs.Cournot(num_agents)
+env = environs.Cournot(args.num_agents)
 
-agents = [agent.Agent(num_actions, learning_rate, beta, epsilon) for _ in range(num_agents)]
+agents = [agent.Agent(args.num_actions, learning_rate, beta, epsilon) for _ in range(args.num_agents)]
 
-for episode in range(num_episodes):
+for episode in range(args.num_episodes):
 
     # reset the environment
     state, info = env.reset()
@@ -50,6 +58,6 @@ for episode in range(num_episodes):
 
 print('Beta is:' +str(beta))
 
-print(f"Training completed over {num_episodes} episodes")
+print(f"Training completed over {args.num_episodes} episodes")
 for i, agent in enumerate(agents):
     print(f"Q-values for agent {i}: {agent.qtable}")
