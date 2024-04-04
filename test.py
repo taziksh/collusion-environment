@@ -32,7 +32,7 @@ epsilon = 0.1 # in paper: not used, but for less computational effort keep that 
 
 # unresolved: Read!
 # TODO: Do they in the paper have several episodes so reset environment several times?
-num_episodes = 1000
+num_episodes = 100
 max_steps = 300
 
 env = environs.Cournot(num_agents,demand_quantity,demand_factor)
@@ -47,22 +47,20 @@ for episode in range(num_episodes):
     state, info = env.reset()
     [agent.reset() for agent in agents]
     done = False
+    sum_qs = 0
 
-    while not done:
-        for s in range(max_steps):
-            actions = [agent.select_action() for agent in agents]
-            
-            # take action and observe reward
-            new_states, rewards, done, _ = env.step(actions, agents)
+    for s in range(max_steps):
+        actions = [agent.select_action(sum_qs) for agent in agents]
+        
+        # take action and observe reward
+        sum_qs, rewards = env.step(actions, agents)
 
-            # Q-learning algorithm
-            for agent_idx, reward in enumerate(rewards):
-                agents[agent_idx].update_qtable(actions[agent_idx], reward)
+        # Q-learning algorithm
+        for agent_idx, reward in enumerate(rewards):
+            agents[agent_idx].update_qtable(actions[agent_idx], reward)
 
-            beta = beta*0.99
+        beta = beta*0.99
 
-            if done:
-                break
     
     # for agent in agents:
     #     agent.decrease_epsilon(episode)

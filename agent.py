@@ -5,7 +5,9 @@ import math
 class Agent:
     def __init__(self, num_actions,num_cumul_actions, learning_rate, beta, epsilon, variable_cost, fixed_cost,memory=False):
         self.num_actions = num_actions
+        self.num_cumul_actions = num_cumul_actions
         self.q = 0
+        self.state = [self.q, 0]
         self.learning_rate = learning_rate
         self.beta = beta
         self.epsilon = epsilon
@@ -20,20 +22,25 @@ class Agent:
 
     def reset(self):
         if self.memory:
-            self.qtable = np.zeros((self.num_states, self.num_cumul_actions, self.num_actions))
+            self.qtable = np.zeros((self.num_actions, self.num_cumul_actions, self.num_actions))
         else:
             self.qtable = np.zeros((1, 1, self.num_actions))
         self.q = 0
+        self.state = [0, 0]
 
     def softmax(self):
-        logit = lambda a: math.exp(self.qtable[0,a]/self.beta) / sum([math.exp(self.qtable[0,a]/self.beta) for a in range(self.num_actions)])
+        total_sum = sum([np.exp(self.qtable[self.state[0], self.state[1], a]/self.beta) for a in range(self.num_actions)])
+
+        logit = lambda a: np.exp(self.qtable[self.state[0], self.state[1], a]/self.beta) / total_sum
         probs = [logit(action) for action in range(0,self.num_actions)]
         return probs
 
     def get_profit(self,price):
         return price*self.q - self.w*self.q - self.f
 
-    def select_action(self):
+    def select_action(self, sum_qs):
+        if self.memory:
+            self.state[1] = sum_qs
         probs = self.softmax()
 
         collect = 0
@@ -50,6 +57,8 @@ class Agent:
                 break
 
         self.q = action
+        if self.memory:
+            self.state[0]=action
 
         return action
                
@@ -68,4 +77,4 @@ class Agent:
         self.epsilon = max(min_epsilon, np.exp(-decay_rate*episode))
 
     def update_qtable(self, action, reward):
-        self.qtable[0, action] = (1 - self.learning_rate) * self.qtable[0, action] + self.learning_rate * reward
+        self.qtable[self.state[0], self.state[1], action] = (1 - self.learning_rate) * self.qtable[self.state[0], self.state[1], action] + self.learning_rate * reward

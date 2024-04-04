@@ -32,23 +32,19 @@ class Cournot(gym.Env):
         #     reward = self._profit_function(q, total_production)
         #     rewards.append(reward)
 
-        observations = [0] * self.num_agents
+        observations = sum(self._qs)
 
         # An episode is done iff the agent has reached the target
-        terminated = [False] * self.num_agents
-        observations = [0] * self.num_agents
-
         rewards = []
         for agent in agents:
             reward = agent.get_profit(self.get_price())
             rewards.append(reward)
 
-        info = {}
-
         if self.render_mode == "human":
             self._render_frame()
 
-        return observations, rewards, terminated, info
+
+        return observations, rewards
 
 # Example Usage
 # print(f"Cournot steps: {Cournot().step(3)}")
