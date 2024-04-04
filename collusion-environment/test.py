@@ -3,22 +3,30 @@ import environs
 import random
 import math
 
-env = environs.Cournot()
+np.set_printoptions(precision=2)
 
-num_actions = 3
+num_agents = 2
 
-qtable = np.ones((1, num_actions))
+num_actions = 5
 
 learning_rate = 0.9
 discount_rate = 0.8
-#epsilon = 0.5 # for randomly chose
 beta = 0.5 # for chosing like in the paper
 decay_rate= 0.005
+#epsilon = 0.5 # for randomly chose
 
 num_episodes = 100
 max_steps = 30
 
-total_softmax = sum([math.exp(qtable[0,a]/beta) for a in range(num_actions)])
+env = environs.Cournot(num_agents)
+#TODO: try np.zeros
+qtables = [np.ones((1, num_actions)) for _ in range(num_agents)]
+
+def softmax(q_values, beta):
+    assert beta > 0
+    q_exp = np.exp(q_values[0] / beta)
+    probs = q_exp / np.sum(q_exp)
+    return probs
 
 for episode in range(num_episodes):
 
@@ -27,47 +35,38 @@ for episode in range(num_episodes):
     done = False
 
     for s in range(max_steps):
-        # exploration-exploitation tradeoff
-        
-        softmax = lambda a: math.exp(qtable[0,a]/beta) / total_softmax
-        
-        probs = [softmax(action) for action in range(0,num_actions)]
-        
-        collect = 0
-        cum_prob = []
-        for prob in probs:
-            collect = prob + collect
-            cum_prob.append(collect)
+        actions = []
 
-        r = random.uniform(0,1)
-        for i in range(0, num_actions):
-            if r < cum_prob[i]:
-                action = i
+        for agent_idx in range(num_agents):            
+            probs = softmax(qtables[agent_idx], beta)
 
-        # if r<cum_prob[0]:
-        #     action = 0
-        # elif r<cum_prob[1]:
-        #     action = 1
-        # else:
-        #     action = 2
+            #randomly choose action
+            action = np.random.choice(range(num_actions), p=probs)
+            
+            actions.append(action)
 
+        #old code: explore v exploit
         '''if random.uniform(0,1) < epsilon:
             # explore
             action = env.action_space.sample()
         else:
             # exploit
-            action = np.argmax(qtable[state,:])'''
-
+            action = np.argmax(qtable[state,:])
+        '''
+        
         # take action and observe reward
-        new_state, reward, done, info = env.step(action)
+        new_states, rewards, done, _ = env.step(actions)
 
         # Q-learning algorithm
-        qtable[state,action] = (1-learning_rate)*qtable[state,action] + learning_rate * reward
+        for agent_idx, reward in enumerate(rewards):
+            qtable = qtables[agent_idx]
+            action = actions[agent_idx]
+            qtable[0,action] = (1-learning_rate)*qtable[0,action] + learning_rate * reward
         #print('{}, {}'.format(action,reward))
         #print(qtable)
 
         # Update to our new state
-        state = new_state
+        # state = new_state
 
         # if done, finish episode
         if done:
@@ -77,4 +76,5 @@ for episode in range(num_episodes):
     # epsilon = np.exp(-decay_rate*episode)
 
 print(f"Training completed over {num_episodes} episodes")
-print(f"Qtable: {qtable}")
+for i, qtable in enumerate(qtables):
+    print(f"Q-values for agent {i}: {qtable}")
