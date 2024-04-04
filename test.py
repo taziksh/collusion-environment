@@ -6,17 +6,27 @@ import math
 
 np.set_printoptions(precision=2)
 
-num_agents = 3
+num_agents = 2 # in paper: [2 , 3, 4 , 5 , 6]
 
-num_actions = 3
+num_actions = 40 # in paper: 40
 
-learning_rate = 0.9
-discount_rate = 0.8
-beta = 1000 # for chosing like in the paper
-decay_rate= 0.005
-epsilon = 0.1
+demand_quantity = 40 # in paper it is denoted with u=40
+demand_factor = 1 # in paper it is denoted with v=1
 
-num_episodes = 10000
+learning_rate = 0.5 # in paper: [ 0.05 , 0.25 , 0.5 , 1 ]
+beta = 1000 # for chosing like in the paper, decay by factor 0.999 each time step
+
+# with memory means we have states different states for each agent:
+# - own previous production level
+# - production level of others
+# myopic says that the agents learn short term achieved reward gamma=0 to update q-table
+# non-myopic means they learn by rewards and expected q-talbe long term values gamma=0.9
+
+gamma = 0 # myopic firms=0 , non-myopic 0.9
+
+epsilon = 0.1 # in paper: not used, but for less computational effort keep that approach
+
+num_episodes = 1000
 max_steps = 300
 
 env = environs.Cournot(num_agents)
@@ -40,7 +50,7 @@ for episode in range(num_episodes):
             for agent_idx, reward in enumerate(rewards):
                 agents[agent_idx].update_qtable(actions[agent_idx], reward)
 
-            beta = beta*0.999
+            beta = beta*0.99
 
             if done:
                 break
