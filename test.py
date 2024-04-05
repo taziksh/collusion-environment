@@ -6,11 +6,16 @@ np.set_printoptions(precision=2)
 
 num_agents = 2 # in paper: [2 , 3, 4 , 5 , 6]
 
-num_actions = 40 # in paper: 40
+num_actions = 4 # in paper: 40
 
-num_cumulative_action = 1 # with memory: num_agents*num_actions
+# cumulative actions: with memory: num_agents*num_actions, without memory: 1
+num_cumulative_action = num_agents*num_actions 
+if num_cumulative_action>1:
+    memory = True
+else:
+    memory = False
 
-demand_quantity = 40 # in paper it is denoted with u=40
+demand_quantity = 4 # in paper it is denoted with u=40
 demand_factor = 1 # in paper it is denoted with v=1
 
 variable_cost = 4 # the variable cost w = 4
@@ -32,13 +37,13 @@ epsilon = 0.1 # in paper: not used, but for less computational effort keep that 
 
 # unresolved: Read!
 # TODO: Do they in the paper have several episodes so reset environment several times?
-num_episodes = 100
-max_steps = 300
+num_episodes = 1000
+max_steps = 1000
 
 env = environs.Cournot(num_agents,demand_quantity,demand_factor)
 
 agents = [agent.Agent(num_actions, num_cumulative_action,
-                      learning_rate, beta, epsilon, variable_cost, fixed_cost)
+                      learning_rate, beta, epsilon, variable_cost, fixed_cost,memory)
                       for _ in range(num_agents)]
 
 for episode in range(num_episodes):
@@ -50,14 +55,14 @@ for episode in range(num_episodes):
     sum_qs = 0
 
     for s in range(max_steps):
-        actions = [agent.select_action(sum_qs) for agent in agents]
+        actions = [agent.select_action() for agent in agents]
         
         # take action and observe reward
         sum_qs, rewards = env.step(actions, agents)
 
         # Q-learning algorithm
         for agent_idx, reward in enumerate(rewards):
-            agents[agent_idx].update_qtable(actions[agent_idx], reward)
+            agents[agent_idx].update_qtable(actions[agent_idx], reward,sum_qs)
 
         beta = beta*0.99
 
@@ -69,4 +74,10 @@ print('Beta is:' +str(beta))
 
 print(f"Training completed over {num_episodes} episodes")
 for i, agent in enumerate(agents):
-    print(f"Q-values for agent {i}: {agent.qtable}")
+    print(f"Q-values for agent {i}:")
+    for a in range(num_actions):
+        print(f"state previous action of agent is {a}:")
+        print("actions are in this order [0,1,2,...,#actions]")
+
+        for k in range(num_actions*num_agents):
+            print(f"state cumulative actions {k}: {agent.qtable[a][k]}")

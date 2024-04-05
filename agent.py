@@ -38,9 +38,8 @@ class Agent:
     def get_profit(self,price):
         return price*self.q - self.w*self.q - self.f
 
-    def select_action(self, sum_qs):
-        if self.memory:
-            self.state[1] = sum_qs
+    def select_action(self):
+
         probs = self.softmax()
 
         collect = 0
@@ -57,8 +56,6 @@ class Agent:
                 break
 
         self.q = action
-        if self.memory:
-            self.state[0]=action
 
         return action
                
@@ -76,5 +73,8 @@ class Agent:
     def decrease_epsilon(self, episode, decay_rate=0.99, min_epsilon=0.01):
         self.epsilon = max(min_epsilon, np.exp(-decay_rate*episode))
 
-    def update_qtable(self, action, reward):
+    def update_qtable(self, action, reward,sum_qs):
         self.qtable[self.state[0], self.state[1], action] = (1 - self.learning_rate) * self.qtable[self.state[0], self.state[1], action] + self.learning_rate * reward
+        if self.memory:
+            self.state[0] = action
+            self.state[1] = sum_qs
