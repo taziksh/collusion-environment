@@ -5,22 +5,44 @@ from tqdm import tqdm
 
 np.set_printoptions(precision=2)
 
-num_agents = 6 # in paper: [2 , 3, 4 , 5 , 6]
+'''
+Parameter settings different from the paper:
+demand:
+u = 10 demandquantity
+v = 1 demandfactor
+maybe other demand function shape?
 
-num_actions = 40 # in paper: 40
+agents:
+w = 1, 2 variable costs
+f = {0,2} fixed costs
+n = {2,3} agents
+actions = 10
+
+RL settings:
+episodes 100
+steps 1000
+learning rate = 0.5
+memory / no memory
+gamma = {0,0.9}
+beta minimum 0.5
+'''
+
+num_agents = 2 # in paper: [2 , 3, 4 , 5 , 6]
+
+num_actions = 10 # in paper: 40
 
 # cumulative actions: with memory: num_agents*num_actions, without memory: 1
-num_cumulative_action = num_agents*num_actions # 1 or num_agents*num_actions
-if num_cumulative_action>1:
-    memory = True
+memory = True
+if memory:
+    num_cumulative_action = num_agents*num_actions
 else:
-    memory = False
+    num_cumulative_action = 1
 
-demand_quantity = 40 # in paper it is denoted with u=40
+demand_quantity = 10 # in paper it is denoted with u=40
 demand_factor = 1 # in paper it is denoted with v=1
 
-variable_cost = 2 # the variable cost w = 4
-fixed_cost = 0 # in the paper we have f = 0
+variable_cost = 1 # the variable cost w = 4
+fixed_cost = 2 # in the paper we have f = 0
 
 learning_rate = 0.5 # in paper: [ 0.05 , 0.25 , 0.5 , 1 ]
 beta = 1000 # for chosing like in the paper
@@ -39,8 +61,8 @@ epsilon = 0.1 # in paper: not used, but for less computational effort keep that 
 
 # unresolved: Read!
 # TODO: Do they in the paper have several episodes so reset environment several times?
-num_episodes = 900     #1000 in paper
-max_steps = 10        #1000 in paper
+num_episodes = 100     #1000 in paper
+max_steps = 1000        #1000 in paper
 
 env = environs.Cournot(num_agents,demand_quantity,demand_factor)
 
@@ -73,7 +95,7 @@ for episode in tqdm(range(num_episodes)):
         for agent_idx, reward in enumerate(rewards):
             agents[agent_idx].update_qtable(reward,sum_qs)
 
-        beta = beta*beta_decay
+        beta = max(beta*beta_decay, 0.1)
     
     # for agent in agents:
     #     agent.decrease_epsilon(episode)
