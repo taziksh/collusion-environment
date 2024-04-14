@@ -4,7 +4,7 @@ import simulation as sim
 np.set_printoptions(precision=2)
 
 '''
-Parameter settings different from the paper:
+Parameter settings differing from the paper:
 demand:
 u = 10 demandquantity
 v = 1 demandfactor

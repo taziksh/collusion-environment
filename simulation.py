@@ -79,6 +79,8 @@ def plot_traj(env,agents,theory,stamp,timesteps):
 
     ls=['-.',':','--','-']
 
+    plt.figure(figsize=(10,10))
+    
     plt.plot([NEquantity]*timesteps, linestyle=(0, (1, 10)))
     plt.plot([COquantity]*timesteps, linestyle=(0, (5, 10)))
     plt.plot(total, linestyle=(0, (5, 1)))
