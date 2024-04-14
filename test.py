@@ -52,7 +52,6 @@ for w in ws:
 
 sim.plot_tables(data,ws,fs,ns,gammemos)
 
-
 '''
 
 ####################### Paper parameter settings #######################################

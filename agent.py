@@ -56,7 +56,7 @@ class Agent:
         return probs
 
     def get_profit(self,price):
-        return price*self.q - self.w*self.q - self.f
+        return price*self.q - self.w*self.q - self.f*(self.q>0)
 
     def select_action(self,beta):
         
