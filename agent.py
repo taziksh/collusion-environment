@@ -4,7 +4,7 @@ import math
 
 class Agent:
     def __init__(self, num_actions,num_cumul_actions, learning_rate,gamma, 
-                 beta, epsilon, variable_cost, fixed_cost,memory=False):
+                 beta, variable_cost, fixed_cost,memory=False):
         self.num_actions = num_actions
         self.num_cumul_actions = num_cumul_actions
         self.q = 0
@@ -12,7 +12,6 @@ class Agent:
         self.learning_rate = learning_rate
         self.beta = beta
         self.gamma = gamma
-        self.epsilon = epsilon
         self.w = variable_cost
         self.f = fixed_cost
         self.memory = memory
@@ -29,9 +28,17 @@ class Agent:
         else:
             self.qtable = np.zeros((1, 1, self.num_actions))'''
         self.q = 0
+        self.action_traj = [0]
         self.state = [0, 0]
 
     def softmax(self):
+
+        if self.beta <= 0.2:
+            q_list = self.qtable[self.state[0], self.state[1]]
+            idx = np.argmax(q_list)
+            probs = [0]*len(q_list)
+            probs[idx] = 1
+            return probs
 
         total_sum = sum([np.exp(self.qtable[self.state[0], self.state[1], q]/self.beta) for q in range(self.num_actions)])
         
@@ -72,11 +79,9 @@ class Agent:
                 break
 
         self.q = action
+        self.action_traj.append(action)
 
         return action
-
-    def decrease_epsilon(self, episode, decay_rate=0.99, min_epsilon=0.01):
-        self.epsilon = max(min_epsilon, np.exp(-decay_rate*episode))
 
     def update_qtable(self, reward, sum_qs):
         self.qtable[self.state[0], self.state[1], self.q] = (1 - self.learning_rate) * self.qtable[self.state[0], self.state[1], self.q] + self.learning_rate * (reward +self.gamma*max(self.qtable[self.state[0], self.state[1]]))

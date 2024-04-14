@@ -13,13 +13,16 @@ class Cournot(gym.Env):
         # self._q = 0
         self._qs = [0] * self.num_agents
 
+        self.sum_qs_traj = []
+        self.rewards_traj = []
+
     def reset(self, seed=None, options=None):
         # We need the following line to seed self.np_random
         super().reset(seed=seed)
 
         self._qs = [0] * self.num_agents
 
-        return [0] * self.num_agents, {} #observation and info
+        return 0, {} #observation and info
 
     def get_price(self):
         total_production = sum(self._qs)
@@ -41,9 +44,11 @@ class Cournot(gym.Env):
             reward = agent.get_profit(price)
             rewards.append(reward)
 
+        self.rewards_traj.append(rewards)
+        self.sum_qs_traj.append(sum_qs)
+
         if self.render_mode == "human":
             self._render_frame()
-
 
         return sum_qs, rewards
 

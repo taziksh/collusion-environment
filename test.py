@@ -1,7 +1,5 @@
 import numpy as np
-import environs
-import agent
-from tqdm import tqdm
+import simulation as sim
 
 np.set_printoptions(precision=2)
 
@@ -26,6 +24,38 @@ memory / no memory
 gamma = {0,0.9}
 beta minimum 0.5
 '''
+ws = [0,1]
+fs = [0,2]
+ns = [2,3]
+gammemos = [[0,False],[0,True],[0.9,True]]
+
+'Starting simulations...'
+
+data = []
+
+for w in ws:
+    for f in fs:
+        for n in ns:
+            for gamma,memory in gammemos:
+
+                agents,env,beta,num_episodes,max_steps, theory = sim.run(
+                    num_agents=n,gamma=gamma,memory=memory,
+                    fixed_cost=f,variable_cost=w)
+
+                stamp = [n,f,w,gamma,memory]     
+
+                overview = sim.print_overview(env,beta,num_episodes,max_steps,theory,stamp)
+
+                sim.plot_traj(env,agents,theory,stamp,timesteps=50)
+
+                data.append([env,agents,overview,theory,stamp])
+
+sim.plot_tables(data,ws,fs,ns,gammemos)
+
+
+'''
+
+####################### Paper parameter settings #######################################
 
 num_agents = 2 # in paper: [2 , 3, 4 , 5 , 6]
 
@@ -59,85 +89,7 @@ gamma = 0 # myopic firms=0 , non-myopic 0.9
 
 epsilon = 0.1 # in paper: not used, but for less computational effort keep that approach
 
-# unresolved: Read!
-# TODO: Do they in the paper have several episodes so reset environment several times?
-num_episodes = 100     #1000 in paper
-max_steps = 1000        #1000 in paper
 
-env = environs.Cournot(num_agents,demand_quantity,demand_factor)
-
-agents = [agent.Agent(num_actions, num_cumulative_action,learning_rate,
-                      gamma, beta, epsilon, variable_cost, fixed_cost,memory)
-                      for _ in range(num_agents)]
-
-joint_profits = []
-joint_quantities = []
-
-for episode in tqdm(range(num_episodes)):
-
-    # reset the environment
-    state, info = env.reset()
-    [agent.reset() for agent in agents]
-    done = False
-    sum_qs = 0
-
-    for s in range(max_steps):
-        actions = [agent.select_action(beta) for agent in agents]
-        
-        # take action and observe reward
-        sum_qs, rewards = env.step(actions, agents)
-
-        #results:
-        joint_profits.append(sum(rewards))
-        joint_quantities.append(sum_qs)
-
-        # Q-learning algorithm
-        for agent_idx, reward in enumerate(rewards):
-            agents[agent_idx].update_qtable(reward,sum_qs)
-
-        beta = max(beta*beta_decay, 0.1)
-    
-    # for agent in agents:
-    #     agent.decrease_epsilon(episode)
-
-print(f'beta after final episode {num_episodes} is: {beta}')
-
-print(f"Training completed over {num_episodes} episodes")
-
-
-for i, agent in enumerate(agents):
-    '''print()
-    print('Softmax values:')
-    print(agent.softmax())
-    print(f"Q-values for agent {i}:")
-    #print("Mean actions for Q-values are given for states")
-    print("actions are in this order [0,1,2,...,#actions]")
-
-    # num_actions only if we have memory true. Otherwise 0+1=1 amount of states for actions
-    for a in range((num_actions-1)*memory+1):
-        print('-----------------------------------------------')
-        print(f"state[0]: previous q_{i} = {a}:")
-        print()
-
-        for k in range(num_cumulative_action):
-            #bullshit, because the weights are negative:
-            #weights = [q_value / sum(agent.qtable[a][k]) for q_value in agent.qtable[a][k]]
-            #mean_action = sum(weight*action for weight, action in zip(weights,range(num_actions)))
-            #print(f"state[1]: mean for previous sum(q_i) = {k}: {mean_action}")
-            print(f"state[1]: previous sum(q_i) = {k}: {agent.qtable[a][k]}")'''
-
-print('---------------------------------------------------')
-NEquantity = round((demand_quantity-variable_cost)*num_agents/(demand_factor*(num_agents+1)))
-NEprofit = round((demand_quantity-variable_cost)**2*num_agents/(demand_factor*(num_agents+1)**2))
-print(f'Nash equilibrium amount is: {NEquantity} with profit {NEprofit}')
-COquantity = round((demand_quantity-variable_cost)/2/demand_factor)
-COprofit = round((demand_quantity-variable_cost)**2/4/demand_factor)
-print(f'Collusive equilibrium amount is: {COquantity} with profit {COprofit}')
-print()
-print('joint profits of the last 10 rounds:')
-print(joint_profits[-10:])
-print('joint quantities of the last 10 rounds:')
-print(joint_quantities[-10:])
-
-print(f"The mean joint profit of last 100 rounds: {np.mean(joint_profits[-10:])}")
-print(f"The mean joint quantity of last 100 rounds: {np.mean(joint_quantities[-10:])}")
+Not mentioned in the paper: How many episodes and how many steps?
+num_episodes = 100     # in total 1,000,000 in paper
+max_steps = 1000         '''
