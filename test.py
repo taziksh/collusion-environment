@@ -24,8 +24,8 @@ memory / no memory
 gamma = {0,0.9}
 beta minimum 0.5
 '''
-ws = [0,1]
-fs = [0,2]
+ws = [0,2]
+fs = [0,10,15]
 ns = [2,3]
 gammemos = [[0,False],[0,True],[0.9,True]]
 
